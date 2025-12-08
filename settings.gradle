@@ -1,2 +1,11 @@
+// settings.gradle (Groovy)
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
 rootProject.name = "GasDensityApp"
-include(":app")
+include ':app'

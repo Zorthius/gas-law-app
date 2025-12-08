@@ -1,29 +1,43 @@
 name: Build Debug APK
 
 on:
-    push:
-        branches: [main]
-    workflow_dispatch:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        steps:
-            - uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - uses: actions/setup-java@v4
-              with:
-                  distribution: temurin
-                  java-version: 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
-            - name: Make gradlew executable
-              run: chmod +x ./gradlew
+      - name: Ensure gradle executable (if present)
+        run: |
+          if [ -f "./gradlew" ]; then chmod +x ./gradlew; fi
 
-            - name: Build debug APK
-              run: ./gradlew assembleDebug
+      - name: Create Gradle wrapper using system Gradle
+        run: |
+          # will use system 'gradle' to create a wrapper that matches CI
+          # this produces gradle/wrapper/gradle-wrapper.properties and gradle-wrapper.jar
+          gradle wrapper --gradle-version 9.2.1
+        # if `gradle` is unavailable on the runner this will fail; hosted runners do provide Gradle
 
-            - uses: actions/upload-artifact@v4
-              with:
-                  name: GasDensityApp-debug
-                  path: app/build/outputs/apk/debug/*.apk
+      - name: Make generated gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build debug APK (use wrapper)
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: GasDensityApp-debug
+          path: app/build/outputs/apk/debug/*.apk
