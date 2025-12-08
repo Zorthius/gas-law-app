@@ -1,2 +1,2 @@
 rootProject.name = "GasDensityApp"
-include ':app'
+include(":app")
